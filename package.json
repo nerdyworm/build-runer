@@ -1,0 +1,11 @@
+{
+  "name": "build-runner",
+  "version": "0.0.0",
+  "description": "Executes a build command then runs it.",
+  "main": "build-runner.js",
+  "scripts": {
+
+  },
+  "author": "Benjamin Rhodes <ben@nerdyworm.com>",
+  "license": "MIT"
+}
