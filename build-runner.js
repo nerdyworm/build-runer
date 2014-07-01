@@ -61,7 +61,7 @@ function Server(cmd) {
 
 function BuilderRunner(options) {
   this.options = options;
-  this.server = new Server(options.server);
+  this.server = new Server(options.run);
 }
 
 BuilderRunner.prototype.buildRun = function() {
