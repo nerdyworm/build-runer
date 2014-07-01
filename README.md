@@ -6,7 +6,8 @@ command and a run command.
 Very helpful for building web applications in go.
 
 ## Gulp example
-```var gulp     = require('gulp'),
+``` js
+var gulp     = require('gulp'),
     BuildRunner = require('build-runner');
 
 var server = new BuildRunner({
