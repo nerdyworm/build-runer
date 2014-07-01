@@ -4,76 +4,72 @@ function log(line) {
   process.stdout.write(line);
 }
 
-function make(cmd, success) {
+function Builder(command) {
+  this.command = command;
+}
+
+Builder.prototype.build = function(callback) {
   log('[build] start');
 
-  var m = spawn(cmd);
+  var build = spawn(this.command);
 
-  m.stdout.on('data', function(data) {
+  build.stdout.on('data', function(data) {
     log('[build] ' + data);
   });
 
-  m.stderr.on('data', function(data) {
+  build.stderr.on('data', function(data) {
     log('[build] ' + data);
   });
 
-  m.on('close', function(code) {
+  build.on('close', function(code) {
     log('[build] done ' + code);
 
     if (code === 0) {
-      success();
+      callback();
     }
   });
+};
+
+function Runner(command) {
+  this.command = command;
+  this.running = null;
 }
 
-function Server(cmd) {
-  var  server = null;
+Runner.prototype.start = function() {
+  if (this.running !== null)
+    return;
 
-  var start = function () {
-    if (server !== null)
-      return;
+  this.running = spawn(this.command);
+  this.running.stdout.on('data', log);
+  this.running.stderr.on('data', log);
+  this.running.on('close', function(code) {
+    log('[running] exited ' + code);
+  });
+};
 
-    server = spawn(cmd);
+Runner.prototype.stop = function() {
+  if (this.running === null)
+    return;
 
-    server.stdout.on('data', function(data) {
-      log(data);
-    });
+  this.running.kill('SIGINT');
+  this.running = null;
+};
 
-    server.stderr.on('data', function(data) {
-      log(data);
-    });
-
-    server.on('close', function(code) {
-      log('[server] exited ' + code);
-    });
-  };
-
-  var stop = function() {
-    if (server === null)
-      return;
-
-    server.kill('SIGINT');
-    server = null;
-  };
-
-  return { start: start, stop: stop };
+function BuildRunner(options) {
+  this.builder = new Builder(options.build);
+  this.runner = new Runner(options.run);
 }
 
-function BuilderRunner(options) {
-  this.options = options;
-  this.server = new Server(options.run);
-}
-
-BuilderRunner.prototype.buildRun = function() {
+BuildRunner.prototype.buildRun = function() {
   var self = this;
-  make(this.options.build, function() {
+  this.builder.build(function() {
     self.restart();
   });
 };
 
-BuilderRunner.prototype.restart = function() {
-  this.server.stop();
-  this.server.start();
+BuildRunner.prototype.restart = function() {
+  this.runner.stop();
+  this.runner.start();
 };
 
-module.exports = BuilderRunner;
+module.exports = BuildRunner;
