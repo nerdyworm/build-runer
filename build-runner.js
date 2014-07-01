@@ -22,7 +22,7 @@ Builder.prototype.build = function(callback) {
   });
 
   build.on('close', function(code) {
-    log('[build] done ' + code);
+    log('[build] done ' + code + '\n');
 
     if (code === 0) {
       callback();
